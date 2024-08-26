@@ -13,8 +13,8 @@ export default function Navbar() {
                     <h1 className="text-2xl font-bold">ZenBlog</h1>
                 </div>
                 <div className="flex gap-4">
-                    <button className="hover:text-gray-500" onClick={() => setIsLoginModalOpen(true)}>Login</button>
-                    <button className="hover:text-gray-500" onClick={() => setIsRegisterModalOpen(true)}>Register</button>
+                    <button className="hover:text-gray-500" onClick={() => setIsLoginModalOpen(true)}>Log in</button>
+                    <button className="hover:text-gray-500" onClick={() => setIsRegisterModalOpen(true)}>Sign up</button>
                 </div>
             </nav>
             <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
