@@ -4,11 +4,15 @@ const cors = require('cors');
 const bcrypt = require('bcrypt');
 const { PrismaClient } = require('@prisma/client');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 
 const prisma = new PrismaClient();
 
 app.use(cors({credentials: true, origin: "http://localhost:5173"}));
 app.use(express.json());
+app.use(cookieParser());
+app.use(helmet());
 
 const JWT_SECRET = "809e176390b96b8c38f517392b8b362cf39cd47a2ea67e0eb241881897dc9a7f";
 
@@ -60,6 +64,13 @@ app.post('/login', async (req, res) => {
             {expiresIn: '1h'}
         )
 
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 3600000
+        });
+
         res.json({message: 'User logged in successfully', token});
     }
     catch (error) {
@@ -68,6 +79,23 @@ app.post('/login', async (req, res) => {
     }
 })
 
+app.get('/user', (req, res) => {
+    const {token} = req.cookies;
+    if (!token) {
+        return res.status(401).json({error: 'Token not found'});
+    }
+    jwt.verify(token, JWT_SECRET, (err) => {
+        if (err) {
+            return res.status(403).json({error: 'Invalid or expired token'});
+        }
+        res.status(200).json({ isLoggedIn: true });
+    })
+})
+
+app.post('/logout', (req, res) => {
+    res.clearCookie('token');
+    res.json({ message: 'User logged out successfully' });
+})
 app.listen(3010);
 
 process.on('SIGINT', async () => {
